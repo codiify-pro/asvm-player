@@ -1,0 +1,47 @@
+{
+  "name": "asvm-player",
+  "productName": "ASVM Player",
+  "version": "1.0.0",
+  "description": "ASVM Stream Player",
+  "main": "main.js",
+  "author": "Aaryan",
+  "homepage": ".",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win"
+  },
+  "dependencies": {
+    "electron": "22.3.27"
+  },
+  "devDependencies": {
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.asvm.player",
+    "productName": "ASVM Player",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "protocols": [
+      {
+        "name": "ASVM Stream Protocol",
+        "schemes": [
+          "asvm"
+        ]
+      }
+    ]
+  }
+}
