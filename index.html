@@ -1,84 +1,287 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASVM Player</title>
 
-<title>ASVM Player</title>
+    <!-- Importing a Premium UI Font (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', "Segoe UI", sans-serif;
+        }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
+        body {
+            /* Clean, soft off-white background to make the white card pop */
+            background-color: #f8fafc;
+            background-image: radial-gradient(circle at top right, #ffffff, #f1f5f9);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
 
-body{
-background:#f5f5f5;
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-}
+        .card {
+            /* Wider card for Desktop PC feel */
+            width: 100%;
+            max-width: 720px;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 48px;
+            
+            /* Premium layered shadow */
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.05),
+                0 20px 40px -10px rgba(220, 38, 38, 0.08);
+            text-align: center;
+            border: 1px solid #f1f5f9;
+        }
 
-.box{
-width:320px;
-background:#fff;
-padding:30px;
-border-radius:20px;
-box-shadow:0 10px 25px rgba(0,0,0,.1);
-text-align:center;
-}
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-.logo{
-font-size:30px;
-margin-bottom:10px;
-}
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 22px;
+            
+            /* Striking Red Gradient */
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            
+            /* Glowing red shadow */
+            box-shadow: 0 12px 24px rgba(220, 38, 38, 0.25);
+            margin-bottom: 24px;
+            transition: transform 0.3s ease;
+        }
 
-h2{
-margin-bottom:10px;
-}
+        .logo:hover {
+            transform: scale(1.05);
+        }
 
-p{
-font-size:14px;
-color:#666;
-line-height:1.5;
-}
+        .logo svg {
+            width: 36px;
+            height: 36px;
+            fill: currentColor;
+            margin-left: 4px; /* Optical alignment for play button */
+        }
 
-.badge{
-margin-top:20px;
-padding:10px;
-background:#f3f3f3;
-border-radius:12px;
-font-size:13px;
-}
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
 
-</style>
+        .desc {
+            margin-top: 12px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #64748b;
+            max-width: 480px;
+        }
+
+        .info {
+            margin-top: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tag {
+            background: #fff;
+            border: 1px solid #fecaca; /* Very light red border */
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #dc2626; /* Primary Red Text */
+            transition: all 0.2s ease;
+        }
+
+        .tag:hover {
+            background: #fef2f2;
+            transform: translateY(-2px);
+        }
+
+        /* Desktop Grid Layout for details */
+        .details-grid {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            text-align: left;
+        }
+
+        .box {
+            background: #fafafa;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle red accent line on boxes */
+        .box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: #dc2626;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .box-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .box-title::after {
+            content: '';
+            height: 1px;
+            flex-grow: 1;
+            background: #e2e8f0;
+        }
+
+        .box-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #475569;
+        }
+
+        .code-snippet {
+            display: block;
+            margin-top: 12px;
+            padding: 10px 14px;
+            background: #fff;
+            border: 1px dashed #fca5a5;
+            border-radius: 8px;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 12px;
+            color: #b91c1c;
+            word-break: break-all;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #f59e0b; /* Warning/Waiting color */
+            border-radius: 50%;
+            margin-right: 6px;
+            box-shadow: 0 0 8px #f59e0b;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid #f1f5f9;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .footer b {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        /* Responsive fallback just in case the desktop window is narrowed */
+        @media (max-width: 640px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+            .card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="box">
+    <div class="card">
+        
+        <div class="header-section">
+            <div class="logo">
+                <!-- Replaced text '▶' with a crisp, modern SVG play icon -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M8 5.14v14.72a1 1 0 001.5.86l11-7.36a1 1 0 000-1.72l-11-7.36a1 1 0 00-1.5.86z"/>
+                </svg>
+            </div>
 
-<div class="logo">
-▶
-</div>
+            <h1>ASVM Player</h1>
 
-<h2>ASVM Player</h2>
+            <p class="desc">
+                Stream online links instantly in VLC Media Player with fast browser integration and automatic playback.
+            </p>
 
-<p>
-Waiting for stream...
-</p>
+            <div class="info">
+                <div class="tag">Version 1.0.0</div>
+                <div class="tag">Author: AS cinemaa</div>
+                <div class="tag">Windows 7 / 8 / 10 / 11</div>
+            </div>
+        </div>
 
-<div class="badge">
-Auto Play in VLC Enabled
-</div>
+        <!-- Desktop Grid: Places Status and Protocol side-by-side -->
+        <div class="details-grid">
+            
+            <div class="box">
+                <div class="box-title">Application Status</div>
+                <div class="box-text">
+                    <div><span class="status-indicator"></span> Waiting for stream link...</div>
+                    <br>
+                    Click a website button or open manually via terminal or browser:
+                    <code class="code-snippet">asvm://player?url=STREAM_LINK</code>
+                </div>
+            </div>
 
-</div>
+            <div class="box">
+                <div class="box-title">Supported Protocol</div>
+                <div class="box-text">
+                    Use the custom URI scheme below to trigger the player externally.
+                    <code class="code-snippet">asvm://player?url=https://example.com/video.m3u8</code>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            Powered by <b>ASVM Player</b>
+        </div>
+
+    </div>
 
 </body>
 </html>
