@@ -2,10 +2,14 @@
   "name": "asvm-player",
   "productName": "ASVM Player",
   "version": "1.0.0",
-  "description": "ASVM Stream Player",
+  "description": "Stream online links instantly in VLC Media Player",
   "main": "main.js",
-  "author": "Aaryan",
+  "author": {
+    "name": "AS Cinemaa"
+  },
   "homepage": ".",
+  "license": "MIT",
+
   "scripts": {
     "start": "electron .",
     "build": "electron-builder --win portable"
@@ -21,6 +25,10 @@
   "build": {
     "appId": "com.asvm.player",
     "productName": "ASVM Player",
+
+    "copyright":
+      "Copyright © 2026 AS Cinemaa",
+
     "asar": true,
 
     "directories": {
@@ -28,15 +36,37 @@
     },
 
     "files": [
-      "**/*"
+      "**/*",
+      "!dist/*",
+      "!node_modules/.cache/*"
     ],
 
+    "extraMetadata": {
+      "main": "main.js"
+    },
+
     "win": {
-      "target": "portable"
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
+
+      "icon": "assets/icon.ico",
+
+      "publisherName": "Aaryan Sah",
+
+      "artifactName":
+        "ASVM-Player-${version}.exe"
     },
 
     "portable": {
-      "artifactName": "ASVM-Player.exe"
+      "artifactName":
+        "ASVM-Player.exe"
     },
 
     "protocols": [
