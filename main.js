@@ -1,57 +1,131 @@
-const { app, BrowserWindow, dialog } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  dialog
+} = require("electron");
+
 const path = require("path");
 const fs = require("fs");
 const { execFile } = require("child_process");
 
-let mainWindow;
+let mainWindow = null;
+
+// ----------------------
+// VLC PATH DETECTION
+// ----------------------
 
 function findVLC() {
+
   const vlcPaths = [
+
     "C:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
+
     "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe",
+
     "D:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
-    "D:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe"
+
+    "D:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe",
+
+    "E:\\Program Files\\VideoLAN\\VLC\\vlc.exe",
+
+    "E:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe"
   ];
 
-  for (const p of vlcPaths) {
-    if (fs.existsSync(p)) {
-      return p;
+  for (const vlcPath of vlcPaths) {
+
+    if (fs.existsSync(vlcPath)) {
+      return vlcPath;
     }
   }
 
   return null;
 }
 
+// ----------------------
+// PLAY STREAM IN VLC
+// ----------------------
+
 function playInVLC(streamUrl) {
+
   const vlcPath = findVLC();
 
   if (!vlcPath) {
+
     dialog.showErrorBox(
       "VLC Not Found",
-      "Please install VLC Media Player first."
+      "VLC Media Player is not installed.\n\nPlease install VLC first."
     );
+
     return;
   }
 
-  execFile(vlcPath, [streamUrl], (err) => {
-    if (err) {
+  execFile(vlcPath, [streamUrl], (error) => {
+
+    if (error) {
+
       dialog.showErrorBox(
-        "Error",
-        "Could not open VLC."
+        "Playback Error",
+        "Could not open stream in VLC."
       );
     }
   });
 }
 
+// ----------------------
+// HANDLE CUSTOM URL
+// ----------------------
+
+function handleProtocolUrl(protocolUrl) {
+
+  try {
+
+    const url = new URL(protocolUrl);
+
+    const stream =
+      url.searchParams.get("url");
+
+    if (stream) {
+
+      playInVLC(stream);
+    }
+
+  } catch (error) {
+
+    dialog.showErrorBox(
+      "Protocol Error",
+      "Invalid stream URL."
+    );
+  }
+}
+
+// ----------------------
+// WINDOW
+// ----------------------
+
 function createWindow() {
+
   mainWindow = new BrowserWindow({
-    width: 420,
-    height: 260,
-    resizable: false,
+
+    width: 480,
+    height: 340,
+
+    minWidth: 480,
+    minHeight: 340,
+
     autoHideMenuBar: true,
+
     title: "ASVM Player",
+
+    backgroundColor: "#ffffff",
+
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+
+      preload:
+        path.join(
+          __dirname,
+          "preload.js"
+        ),
+
       contextIsolation: true,
       nodeIntegration: false
     }
@@ -60,68 +134,126 @@ function createWindow() {
   mainWindow.loadFile("index.html");
 }
 
-const gotLock = app.requestSingleInstanceLock();
+// ----------------------
+// SINGLE INSTANCE
+// ----------------------
+
+const gotLock =
+  app.requestSingleInstanceLock();
 
 if (!gotLock) {
+
   app.quit();
+
+} else {
+
+  app.on(
+    "second-instance",
+    (event, argv) => {
+
+      const protocolArg =
+        argv.find(arg =>
+          arg.startsWith(
+            "asvm://"
+          )
+        );
+
+      if (protocolArg) {
+
+        handleProtocolUrl(
+          protocolArg
+        );
+      }
+
+      if (mainWindow) {
+
+        if (
+          mainWindow.isMinimized()
+        ) {
+          mainWindow.restore();
+        }
+
+        mainWindow.focus();
+      }
+    }
+  );
 }
+
+// ----------------------
+// APP READY
+// ----------------------
 
 app.whenReady().then(() => {
 
-  app.setAsDefaultProtocolClient("asvm");
-
   createWindow();
 
-  const protocolArg = process.argv.find(arg =>
-    arg.startsWith("asvm://")
-  );
+  // Protocol Register Fix
 
-  if (protocolArg) {
-    try {
-      const urlObj = new URL(protocolArg);
-      const stream =
-        urlObj.searchParams.get("url");
+  if (process.defaultApp) {
 
-      if (stream) {
-        playInVLC(stream);
-      }
+    app.setAsDefaultProtocolClient(
+      "asvm",
+      process.execPath,
+      [
+        path.resolve(
+          process.argv[1]
+        )
+      ]
+    );
 
-    } catch (e) {
-      console.log(e);
-    }
+  } else {
+
+    app.setAsDefaultProtocolClient(
+      "asvm"
+    );
   }
-});
 
-app.on("second-instance", (event, argv) => {
+  // Open from browser
 
   const protocolArg =
-    argv.find(arg =>
-      arg.startsWith("asvm://")
+    process.argv.find(arg =>
+      arg.startsWith(
+        "asvm://"
+      )
     );
 
   if (protocolArg) {
-    try {
 
-      const urlObj =
-        new URL(protocolArg);
+    handleProtocolUrl(
+      protocolArg
+    );
+  }
+});
 
-      const stream =
-        urlObj.searchParams.get("url");
+// ----------------------
+// APP EVENTS
+// ----------------------
 
-      if (stream) {
-        playInVLC(stream);
-      }
+app.on(
+  "window-all-closed",
+  () => {
 
-    } catch (e) {
-      console.log(e);
+    if (
+      process.platform !==
+      "darwin"
+    ) {
+
+      app.quit();
     }
   }
+);
 
-  if (mainWindow) {
-    mainWindow.focus();
+app.on(
+  "activate",
+  () => {
+
+    if (
+      BrowserWindow
+        .getAllWindows()
+        .length === 0
+    ) {
+
+      createWindow();
+    }
   }
-});
-
-app.on("window-all-closed", () => {
-  app.quit();
-});
+);
